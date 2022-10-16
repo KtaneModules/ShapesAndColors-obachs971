@@ -39,6 +39,9 @@ public class shapesAndColors : MonoBehaviour {
 	private int colorCursor = -1;
 	private int shapeCursor = -1;
 	private bool notStart = false;
+
+	//private bool doLoop = true;
+
 	void Awake()
 	{
 		moduleId = moduleIdCounter++;
@@ -59,6 +62,8 @@ public class shapesAndColors : MonoBehaviour {
 		//Debug.LogFormat("[Shapes and Colors #{0}] Solution:", moduleId);
 		//foreach (string[] arr in solution)
 			//Debug.LogFormat("[Shapes and Colors #{0}] {1} {2} {3}", moduleId, arr[0], arr[1], arr[2]);
+		
+		//loop:
 		textClues = generateClues().Shuffle();
 		clueCursor = 0;
 		clues = new List<Material[]>();
@@ -70,10 +75,18 @@ public class shapesAndColors : MonoBehaviour {
 				if ((i / 3) >= clue.Length || (i % 3) >= clue[i / 3].Length)
 					clues[clues.Count - 1][i] = images[1];
 				else
+                {
+					//Debug.LogFormat("[Shapes and Colors #{0}] Space Check: {1}", moduleId, clue[i / 3][i % 3]);
 					clues[clues.Count - 1][i] = images[getMat(clue[i / 3][i % 3])];
+				}
+					
 			}
 		}
-		if(notStart)
+		/*
+		if(doLoop)
+			goto loop;*/
+
+		if (notStart)
 		{
 			foreach (MeshRenderer space in gridMeshRender)
 			{
@@ -431,7 +444,7 @@ public class shapesAndColors : MonoBehaviour {
 				Debug.LogFormat("[Shapes and Colors #{0}] {1}", moduleId, temp);
 			}
 		}*/
-		for(int i = 0; i < clues.Count; i++)
+		for (int i = 0; i < clues.Count; i++)
 		{
 			clues[i] = shrinkClue(clues[i]);
 			Debug.LogFormat("[Shapes and Colors #{0}] Clue #{1}:", moduleId, (i + 1));
@@ -452,7 +465,6 @@ public class shapesAndColors : MonoBehaviour {
 				Debug.LogFormat("[Shapes and Colors #{0}] {1}", moduleId, temp);
 			}
 		}
-
 		return clues;
 	}
 	//This method loops until the clue can only be placed onto exactly 1 spot on the grid
@@ -748,6 +760,7 @@ public class shapesAndColors : MonoBehaviour {
 										combine[combine.Count - 1][row][col] = "RYB".Replace(combine[combine.Count - 1][row][col][1] + "", "").Replace(clues[j][row][col][1] + "", "") + "W";
 									else
 										combine[combine.Count - 1][row][col] = "W" + "CTS".Replace(combine[combine.Count - 1][row][col][1] + "", "").Replace(clues[j][row][col][1] + "", "");
+										
 								}
 								else if (clues[j][row][col].Length > combine[combine.Count - 1][row][col].Length)
 									combine[combine.Count - 1][row][col] = clues[j][row][col].ToUpperInvariant();
@@ -788,7 +801,7 @@ public class shapesAndColors : MonoBehaviour {
 						return false;
 					if (c1[i][j][0] == '-' && c2[i][j][0] == '-')
 					{
-						if(getType(c1[i][j][1]) != getType(c1[i][j][1]))
+						if(getType(c1[i][j][1]) != getType(c2[i][j][1]))
 							return false;
 					}
 				}

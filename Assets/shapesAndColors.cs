@@ -84,8 +84,8 @@ public class shapesAndColors : MonoBehaviour {
 		}
 		/*
 		if(doLoop)
-			goto loop;*/
-
+			goto loop;
+		*/
 		if (notStart)
 		{
 			foreach (MeshRenderer space in gridMeshRender)
@@ -408,16 +408,27 @@ public class shapesAndColors : MonoBehaviour {
 			if(poss[row][col].Count > 1)
 			{
 				string[][] clue = { new string[] { "WW", "WW", "WW" }, new string[] { "WW", "WW", "WW" }, new string[] { "WW", "WW", "WW" } };
-				
-				string choice = "";
+				List<string> choice = new List<string>();
 				if (getSum(poss[row][col], solution[row][col][0] + "") == 1)
-					choice = choice + "" + solution[row][col][0];
+					choice.Add("" + solution[row][col][0]);
 				if (getSum(poss[row][col], solution[row][col][1] + "") == 1)
-					choice = choice + "" + solution[row][col][1];
-				if (choice.Length == 0)
-					clue[row][col] = solution[row][col].ToUpperInvariant();
-				else
-					clue[row][col] = "" + choice[UnityEngine.Random.Range(0, choice.Length)];
+					choice.Add("" + solution[row][col][1]);
+				if (choice.Count() == 0)
+					choice.Add(solution[row][col].ToUpperInvariant());
+				string negatives = "RYBCTD";
+				foreach (char c in solution[row][col])
+					negatives = negatives.Replace(c + "", "");
+				foreach (char c in negatives)
+					choice.Add("-" + c);
+				choice.Shuffle();
+				foreach(string str in choice)
+				{
+					if(canBeUsed(poss[row][col], str))
+					{
+						clue[row][col] = str + "";
+						break;
+					}
+				}
 				clue = removeSpaces(poss, clue, row, col);
 				clue = finalizeClue(clue, poss);
 				clues.Add(clue);
@@ -426,24 +437,6 @@ public class shapesAndColors : MonoBehaviour {
 			}
 		}
 		clues = combineClues(clues);
-		/*
-		for(int i = 0; i < clues.Count; i++)
-		{
-			Debug.LogFormat("[Shapes and Colors #{0}] Clue #{1}:", moduleId, (i + 1));
-			clues[i] = shrinkClue(clues[i]);
-			for(int j = 0; j < 3; j++)
-			{
-				string temp = "";
-				for(int k = 0; k < 3; k++)
-				{
-					if(j >= clues[i].Length || k >= clues[i][0].Length)
-						temp = temp + "KK ";
-					else
-						temp = temp + "" + clues[i][j][k] + " ";
-				}
-				Debug.LogFormat("[Shapes and Colors #{0}] {1}", moduleId, temp);
-			}
-		}*/
 		for (int i = 0; i < clues.Count; i++)
 		{
 			clues[i] = shrinkClue(clues[i]);
@@ -467,6 +460,29 @@ public class shapesAndColors : MonoBehaviour {
 		}
 		return clues;
 	}
+	//Checks if the clue being placed on that space reduces the number of possibilities to 1.
+	private bool canBeUsed(List<string> possible, string clueSpace)
+	{
+		int sum = 0;
+		if(clueSpace[0] == '-')
+		{
+			foreach (string poss in possible)
+			{
+				if (!(poss.Contains(clueSpace[1])))
+					sum++;
+			}
+		}
+		else
+		{
+			foreach (string poss in possible)
+			{
+				if (poss.Contains(clueSpace))
+					sum++;
+			}
+		}
+		return (sum == 1);
+	}
+
 	//This method loops until the clue can only be placed onto exactly 1 spot on the grid
 	//1st: It checks how many places would fit the clue on the grid at its current state
 	//2nd: If it is greater than 1, then the method will try to place clue facts on

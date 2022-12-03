@@ -773,9 +773,9 @@ public class shapesAndColors : MonoBehaviour {
 								if (clues[j][row][col][0] == '-' && clues[j][row][col][1] != combine[combine.Count - 1][row][col][1])
 								{
 									if (getType(combine[combine.Count - 1][row][col][1]) == 0)
-										combine[combine.Count - 1][row][col] = "RYB".Replace(combine[combine.Count - 1][row][col][1] + "", "").Replace(clues[j][row][col][1] + "", "") + "W";
+										combine[combine.Count - 1][row][col] = "RYB".Replace(combine[combine.Count - 1][row][col][1] + "", "").Replace(clues[j][row][col][1] + "", "");
 									else
-										combine[combine.Count - 1][row][col] = "W" + "CTD".Replace(combine[combine.Count - 1][row][col][1] + "", "").Replace(clues[j][row][col][1] + "", "");
+										combine[combine.Count - 1][row][col] = "CTD".Replace(combine[combine.Count - 1][row][col][1] + "", "").Replace(clues[j][row][col][1] + "", "");
 								}
 								else if (clues[j][row][col].Length > combine[combine.Count - 1][row][col].Length)
 									combine[combine.Count - 1][row][col] = clues[j][row][col].ToUpperInvariant();

@@ -6,8 +6,6 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class shapesAndColors : MonoBehaviour {
-	private static readonly int NUM_ROW = 3;
-	private static readonly int NUM_COL = 3;
 	public KMBombModule module;
 	public new KMAudio audio;
 	public KMSelectable ClueUp;

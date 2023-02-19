@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PuzzleGenerator {
@@ -11,6 +12,7 @@ public class PuzzleGenerator {
     public List<string[][]> getClues()
     {
         string[][] solution = getInitialSolution();
+       
         List<int> positions = getShuffledPositions();
         List<List<List<string>>> possible = getInitialPossible();
         List<string[][]> clues = new List<string[][]>();
@@ -178,31 +180,39 @@ public class PuzzleGenerator {
     private void removePossibleCombinations(List<List<List<string>>> possible)
     {
         bool flag = true;
-        while(flag)
+        while (flag)
         {
-            List<string> remove = new List<string>();
-            for(int i = 0; i < gridSize; i++)
+            Dictionary<string, int> dict = new Dictionary<string, int>();
+            for (int row = 0; row < possible.Count; row++)
             {
-                for(int j = 0; j < gridSize; j++)
+                for (int col = 0; col < possible[row].Count; col++)
                 {
-                    if (possible[i][j].Count == 1)
-                        remove.Add(possible[i][j][0]);
+                    string temp = string.Join(" ", possible[row][col].ToArray());
+                    if (dict.ContainsKey(temp))
+                        dict[temp]++;
+                    else
+                        dict.Add(temp, 1);   
                 }
             }
             flag = false;
-            for (int i = 0; i < gridSize; i++)
+            foreach (string str in dict.Keys)
             {
-                for (int j = 0; j < gridSize; j++)
+                string[] list = str.Split(' ');
+                if (list.Length == dict[str])
                 {
-                    if (possible[i][j].Count > 1)
+                    for (int i = 0; i < gridSize; i++)
                     {
-                        foreach (string element in remove)
+                        for (int j = 0; j < gridSize; j++)
                         {
-                            if (possible[i][j].Contains(element))
+                            if (!(list.SequenceEqual(possible[i][j].ToArray())))
                             {
-                                possible[i][j].Remove(element);
-                                flag = true;
+                                for (int k = 0; k < list.Length; k++)
+                                {
+                                    if (possible[i][j].Remove(list[k]))
+                                        flag = true;
+                                }
                             }
+
                         }
                     }
                 }

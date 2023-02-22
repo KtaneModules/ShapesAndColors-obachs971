@@ -645,15 +645,15 @@ public class PuzzleGenerator {
         types.Shuffle();
         for (int i = 0; i < clues.Count; i++)
         {
-            foreach(int type in types)
+            for(int j = 0; j < types.Count; j++)
             {
                 bool flag = true;
                 int[] minArea = getMinArea(clues[i]);  // Top, Right, Bottom, Left
-                if (type % 2 == 0)
+                if (types[j] % 2 == 0)
                 {
-                    for (int j = 0; j < gridSize; j++)
+                    for (int k = 0; k < gridSize; k++)
                     {
-                        if (!(clues[i][minArea[type]][j].Equals("WW") || clues[i][minArea[type]][j].Equals("KK")))
+                        if (!(clues[i][minArea[types[j]]][k].Equals("WW") || clues[i][minArea[types[j]]][k].Equals("KK")))
                         {
                             flag = false;
                             break;
@@ -662,9 +662,9 @@ public class PuzzleGenerator {
                 }
                 else
                 {
-                    for (int j = 0; j < gridSize; j++)
+                    for (int k = 0; k < gridSize; k++)
                     {
-                        if (!(clues[i][j][minArea[type]].Equals("WW") || clues[i][j][minArea[type]].Equals("KK")))
+                        if (!(clues[i][k][minArea[types[j]]].Equals("WW") || clues[i][k][minArea[types[j]]].Equals("KK")))
                         {
                             flag = false;
                             break;
@@ -674,20 +674,24 @@ public class PuzzleGenerator {
                 if (flag)
                 {
                     string[][] temp = copyArray(clues[i]);
-                    if (type % 2 == 0)
+                    if (types[j] % 2 == 0)
                     {
-                        for (int j = 0; j < gridSize; j++)
-                            clues[i][minArea[type]][j] = "KK";
+                        for (int k = 0; k < gridSize; k++)
+                            clues[i][minArea[types[j]]][k] = "KK";
                     }
                     else
                     {
-                        for (int j = 0; j < gridSize; j++)
-                            clues[i][j][minArea[type]] = "KK";
+                        for (int k = 0; k < gridSize; k++)
+                            clues[i][k][minArea[types[j]]] = "KK";
                     }
                     if (!(canSolve(clues)))
                         clues[i] = temp;
                     else
+                    {
                         needUpdate = true;
+                        j--;
+                    }
+                        
                 }
             }
         }

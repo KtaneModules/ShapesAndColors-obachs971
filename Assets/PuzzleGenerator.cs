@@ -8,11 +8,13 @@ public class PuzzleGenerator {
     private readonly string letters = "RYB";
     private readonly string numbers = "CTD";
     private bool needUpdate = false;
+    private string[][] TPsol;
     // Returns an list of randomly generated clues
     public List<string[][]> getClues()
     {
         string[][] solution = getInitialSolution();
-       
+        TPsol = solution;
+
         List<int> positions = getShuffledPositions();
         List<List<List<string>>> possible = getInitialPossible();
         List<string[][]> clues = new List<string[][]>();
@@ -47,7 +49,11 @@ public class PuzzleGenerator {
         turnSpacesBlack(clues);         // Gen 7
         return clues;
     }
-
+    //This is for TP autosolve
+    public string[][] getSolution()
+    {
+        return TPsol;
+    }
     // Returns a randomly generated solution
     private string[][] getInitialSolution()
     {

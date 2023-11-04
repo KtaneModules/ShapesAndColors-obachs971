@@ -37,7 +37,7 @@ public class shapesAndColors : MonoBehaviour {
 	private int colorCursor = -1;
 	private int shapeCursor = -1;
 	private bool notStart = false;
-
+	private bool TPautosolve = false;
 	void Awake()
 	{
 		moduleId = moduleIdCounter++;
@@ -52,6 +52,7 @@ public class shapesAndColors : MonoBehaviour {
 		submission = new string[][] { new string[] { "WW", "WW", "WW" }, new string[] { "WW", "WW", "WW" }, new string[] { "WW", "WW", "WW" } };
 		PuzzleGenerator gen = new PuzzleGenerator();
 		textClues = gen.getClues().Shuffle();
+		solution = gen.getSolution();
 		clueCursor = 0;
 		for(int i = 0; i < textClues.Count; i++)
 		{
@@ -422,100 +423,120 @@ public class shapesAndColors : MonoBehaviour {
 #pragma warning restore 414
 	IEnumerator ProcessTwitchCommand(string command)
 	{
-		string[] param = command.ToUpper().Split(' ');
-		if ((Regex.IsMatch(param[0], @"^\s*PRESS\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(param[0], @"^\s*P\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)) && param.Length > 1)
+		if(!TPautosolve)
 		{
-			if (isButton(param))
+			string[] param = command.ToUpper().Split(' ');
+			if ((Regex.IsMatch(param[0], @"^\s*PRESS\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(param[0], @"^\s*P\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)) && param.Length > 1)
+			{
+				if (isButton(param))
+				{
+					yield return null;
+					for (int i = 1; i < param.Length; i++)
+					{
+						switch (param[i])
+						{
+							case "UP":
+								ClueUp.OnInteract();
+								break;
+							case "DOWN":
+								ClueDown.OnInteract();
+								break;
+							case "RED":
+							case "R":
+								colorInput[0].OnInteract();
+								break;
+							case "YELLOW":
+							case "Y":
+								colorInput[1].OnInteract();
+								break;
+							case "BLUE":
+							case "B":
+								colorInput[2].OnInteract();
+								break;
+							case "CIRCLE":
+							case "C":
+								shapeInput[0].OnInteract();
+								break;
+							case "TRIANGLE":
+							case "T":
+								shapeInput[1].OnInteract();
+								break;
+							case "DIAMOND":
+							case "D":
+								shapeInput[2].OnInteract();
+								break;
+							case "TL":
+							case "1":
+								grid[0].OnInteract();
+								break;
+							case "TM":
+							case "2":
+								grid[1].OnInteract();
+								break;
+							case "TR":
+							case "3":
+								grid[2].OnInteract();
+								break;
+							case "ML":
+							case "4":
+								grid[3].OnInteract();
+								break;
+							case "MM":
+							case "5":
+								grid[4].OnInteract();
+								break;
+							case "MR":
+							case "6":
+								grid[5].OnInteract();
+								break;
+							case "BL":
+							case "7":
+								grid[6].OnInteract();
+								break;
+							case "BM":
+							case "8":
+								grid[7].OnInteract();
+								break;
+							case "BR":
+							case "9":
+								grid[8].OnInteract();
+								break;
+						}
+						yield return new WaitForSeconds(0.2f);
+					}
+				}
+				else
+					yield return "sendtochat An error occured because the user inputted something wrong.";
+			}
+			else if (Regex.IsMatch(param[0], @"^\s*SUBMIT\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) && param.Length == 1)
 			{
 				yield return null;
-				for (int i = 1; i < param.Length; i++)
+				submit.OnInteract();
+			}
+			else if (Regex.IsMatch(param[0], @"^\s*CLEAR\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) && param.Length == 1)
+			{
+				yield return null;
+				if (colorCursor >= 0)
 				{
-					switch (param[i])
-					{
-						case "UP":
-							ClueUp.OnInteract();
-							break;
-						case "DOWN":
-							ClueDown.OnInteract();
-							break;
-						case "RED": case "R":
-							colorInput[0].OnInteract();
-							break;
-						case "YELLOW": case "Y":
-							colorInput[1].OnInteract();
-							break;
-						case "BLUE": case "B":
-							colorInput[2].OnInteract();
-							break;
-						case "CIRCLE": case "C":
-							shapeInput[0].OnInteract();
-							break;
-						case "TRIANGLE": case "T":
-							shapeInput[1].OnInteract();
-							break;
-						case "DIAMOND": case "D":
-							shapeInput[2].OnInteract();
-							break;
-						case "TL": case "1":
-							grid[0].OnInteract();
-							break;
-						case "TM": case "2":
-							grid[1].OnInteract();
-							break;
-						case "TR": case "3":
-							grid[2].OnInteract();
-							break;
-						case "ML": case "4":
-							grid[3].OnInteract();
-							break;
-						case "MM": case "5":
-							grid[4].OnInteract();
-							break;
-						case "MR": case "6":
-							grid[5].OnInteract();
-							break;
-						case "BL": case "7":
-							grid[6].OnInteract();
-							break;
-						case "BM": case "8":
-							grid[7].OnInteract();
-							break;
-						case "BR": case "9":
-							grid[8].OnInteract();
-							break;
-					}
+					colorInput[colorCursor].OnInteract();
+					yield return new WaitForSeconds(0.2f);
+				}
+				if (shapeCursor >= 0)
+				{
+					shapeInput[shapeCursor].OnInteract();
+					yield return new WaitForSeconds(0.2f);
+				}
+				foreach (KMSelectable space in grid)
+				{
+					space.OnInteract();
 					yield return new WaitForSeconds(0.2f);
 				}
 			}
 			else
 				yield return "sendtochat An error occured because the user inputted something wrong.";
 		}
-		else if (Regex.IsMatch(param[0], @"^\s*SUBMIT\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) && param.Length == 1)
-		{
-			yield return null;
-			submit.OnInteract();
-		}
-		else if (Regex.IsMatch(param[0], @"^\s*CLEAR\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) && param.Length == 1)
-		{
-			yield return null;
-			if(colorCursor >= 0)
-			{
-				colorInput[colorCursor].OnInteract();
-				yield return new WaitForSeconds(0.2f);
-			}
-			if (shapeCursor >= 0)
-			{
-				shapeInput[shapeCursor].OnInteract();
-				yield return new WaitForSeconds(0.2f);
-			}
-			foreach(KMSelectable space in grid)
-			{
-				space.OnInteract();
-				yield return new WaitForSeconds(0.2f);
-			}
-		}
 		else
-			yield return "sendtochat An error occured because the user inputted something wrong.";
+			yield return "sendtochat Module is being solved at the moment.";
 	}
 	private bool isButton(string[] param)
 	{
@@ -546,5 +567,47 @@ public class shapesAndColors : MonoBehaviour {
 		}
 		return true;
 	}
-	
+	private IEnumerator TwitchHandleForcedSolve()
+	{
+		TPautosolve = true;
+		for(int i = 0; i < submission.Length; i++)
+		{
+			for(int j = 0; j < submission.Length; j++)
+			{
+				if(!submission[i][j].Equals(solution[i][j]))
+				{
+					if (submission[i][j][0] != solution[i][j][0])
+					{
+						if(colorCursor != "RYB".IndexOf(solution[i][j][0]))
+						{
+							colorInput["RYB".IndexOf(solution[i][j][0])].OnInteract();
+							yield return new WaitForSeconds(0.2f);
+						}
+					}
+					else if (colorCursor >= 0)
+					{
+						colorInput[colorCursor].OnInteract();
+						yield return new WaitForSeconds(0.2f);
+					}
+					if (submission[i][j][1] != solution[i][j][1])
+					{
+						if(shapeCursor != "CTD".IndexOf(solution[i][j][1]))
+						{
+							shapeInput["CTD".IndexOf(solution[i][j][1])].OnInteract();
+							yield return new WaitForSeconds(0.2f);
+						}
+					}
+					else if (shapeCursor >= 0)
+					{
+						shapeInput[shapeCursor].OnInteract();
+						yield return new WaitForSeconds(0.2f);
+					}
+					grid[(i * submission.Length) + j].OnInteract();
+					yield return new WaitForSeconds(0.2f);
+				}
+			}
+		}
+		submit.OnInteract();
+		yield return new WaitForSeconds(0.1f);
+	}
 }

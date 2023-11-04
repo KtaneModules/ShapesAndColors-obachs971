@@ -117,7 +117,6 @@ public class shapesAndColors : MonoBehaviour {
 		int[] indexes = { 0, 1, 2 };
 		ClueUp.OnInteract = delegate { audio.PlaySoundAtTransform(Arrows[0].name, transform); clueCursor = mod(clueCursor - 1, clues.Count); displayClue(); return false; };
 		ClueDown.OnInteract = delegate { audio.PlaySoundAtTransform(Arrows[1].name, transform); clueCursor = mod(clueCursor + 1, clues.Count); displayClue(); return false; };
-		submit.OnInteract = delegate { StartCoroutine(pressedSubmit()); return false; };
 		foreach (int index in indexes)
 		{
 			colorInput[index].OnInteract = delegate { selectColor(index); return false; };
@@ -126,6 +125,7 @@ public class shapesAndColors : MonoBehaviour {
 		indexes = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
 		foreach (int index in indexes)
 			grid[index].OnInteract = delegate { pressedGrid(index); return false; };
+		submit.OnInteract = delegate { StartCoroutine(pressedSubmit()); return false; };
 		notStart = true;
 	}
 	private void selectColor(int cursor)
@@ -265,8 +265,11 @@ public class shapesAndColors : MonoBehaviour {
 				skip2:
 				if(!(flag))
 				{
-					module.HandleStrike();
-					foreach(MeshRenderer backSpace in backSpaces)
+					if (_strikeAvoid)
+						Debug.LogFormat("[Shapes and Colors #{0}] Strike prevented in autosolver.", moduleId);
+					else
+						module.HandleStrike();
+					foreach (MeshRenderer backSpace in backSpaces)
 						backSpace.material = images[getMat("R")];
 					yield return new WaitForSeconds(5.0f);
 					foreach (MeshRenderer backSpace in backSpaces)
@@ -328,7 +331,10 @@ public class shapesAndColors : MonoBehaviour {
 			}
 			else
 			{
-				module.HandleStrike();
+				if(_strikeAvoid)
+					Debug.LogFormat("[Shapes and Colors #{0}] Strike prevented in autosolver.", moduleId);
+				else
+					module.HandleStrike();
 				foreach (int blank in missed)
 					clueMeshRender[blank].material = images[getMat("R")];
 				for(int i = 0; i < submission.Length; i++)
@@ -347,7 +353,10 @@ public class shapesAndColors : MonoBehaviour {
 		}
 		else
 		{
-			module.HandleStrike();
+			if (_strikeAvoid)
+				Debug.LogFormat("[Shapes and Colors #{0}] Strike prevented in autosolver.", moduleId);
+			else
+				module.HandleStrike();
 			foreach (int space in notFilled)
 				backSpaces[space].material = images[getMat("R")];
 			yield return new WaitForSeconds(1.0f);
@@ -538,6 +547,7 @@ public class shapesAndColors : MonoBehaviour {
 		else
 			yield return "sendtochat Module is being solved at the moment.";
 	}
+
 	private bool isButton(string[] param)
 	{
 		for(int i = 1; i < param.Length; i++)
@@ -567,8 +577,14 @@ public class shapesAndColors : MonoBehaviour {
 		}
 		return true;
 	}
+
+	private bool _strikeAvoid;
 	private IEnumerator TwitchHandleForcedSolve()
 	{
+		_strikeAvoid = true;
+		while (submit.OnInteract == null)
+			yield return true;
+		_strikeAvoid = false;
 		TPautosolve = true;
 		for(int i = 0; i < submission.Length; i++)
 		{

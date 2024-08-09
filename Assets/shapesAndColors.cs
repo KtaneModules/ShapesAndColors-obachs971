@@ -434,7 +434,7 @@ public class shapesAndColors : MonoBehaviour {
 	{
 		if(!TPautosolve)
 		{
-			string[] param = command.ToUpper().Split(' ');
+			string[] param = command.ToUpperInvariant().Split(' ');
 			if ((Regex.IsMatch(param[0], @"^\s*PRESS\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(param[0], @"^\s*P\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)) && param.Length > 1)
 			{
 				if (isButton(param))
@@ -514,8 +514,6 @@ public class shapesAndColors : MonoBehaviour {
 						yield return new WaitForSeconds(0.2f);
 					}
 				}
-				else
-					yield return "sendtochat An error occured because the user inputted something wrong.";
 			}
 			else if (Regex.IsMatch(param[0], @"^\s*SUBMIT\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) && param.Length == 1)
 			{
@@ -541,11 +539,9 @@ public class shapesAndColors : MonoBehaviour {
 					yield return new WaitForSeconds(0.2f);
 				}
 			}
-			else
-				yield return "sendtochat An error occured because the user inputted something wrong.";
 		}
 		else
-			yield return "sendtochat Module is being solved at the moment.";
+			yield return "sendtochaterror Module is being solved at the moment.";
 	}
 
 	private bool isButton(string[] param)

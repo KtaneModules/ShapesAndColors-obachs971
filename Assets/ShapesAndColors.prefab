@@ -4246,7 +4246,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ModuleType: shapesAndColors
   ModuleDisplayName: Shapes and Colors
-  RequiresTimerVisibility: 1
+  RequiresTimerVisibility: 0
 --- !u!114 &114232290968540180
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -9,9 +9,11 @@ public class PuzzleGenerator {
     private readonly string numbers = "CTD";
     private bool needUpdate = false;
     private string[][] TPsol;
+    //private bool needLoop;
     // Returns an list of randomly generated clues
     public List<string[][]> getClues()
     {
+        //looper:
         string[][] solution = getInitialSolution();
         TPsol = solution;
 
@@ -32,18 +34,53 @@ public class PuzzleGenerator {
                 clues.Add(clue);
             }
         }
-        combineClues(clues, solution);  // Gen 4
+        //needLoop = true;
         removeRedundantClues(clues);    // Gen 5
         removeRedundantClueElements(clues); // Gen 5
+        removeRedundantClues(clues);    // Gen 5
         removeRedundantSpaces(clues);   // Gen 6
+        removeRedundantClues(clues);    // Gen 5
+        combineClues(clues, solution);  // Gen 4
+        while (needUpdate)
+        {
+            //needLoop = true;
+            needUpdate = false;
+            removeRedundantClues(clues);    // Gen 5
+            removeRedundantClueElements(clues); // Gen 5
+            removeRedundantClues(clues);    // Gen 5
+            removeRedundantSpaces(clues);   // Gen 6
+            removeRedundantClues(clues);    // Gen 5
+            combineClues(clues, solution);  // Gen 4
+        }
+        //needLoop = true;
+        //canSolve(clues);
+        //if (needLoop)
+        //    goto looper;
+        for (int i = 0; i < clues.Count; i++)
+            clues[i] = shrinkClue(clues[i]);
+        turnSpacesBlack(clues);         // Gen 7
+        return clues;
+    }
+    public List<string[][]> debugClues(List<string[][]> clues, string[][] solution)
+    {
+        removeRedundantClues(clues);    // Gen 5
+        removeRedundantClueElements(clues); // Gen 5
+        removeRedundantClues(clues);    // Gen 5
+        removeRedundantSpaces(clues);   // Gen 6
+        removeRedundantClues(clues);    // Gen 5
+        combineClues(clues, solution);  // Gen 4
         while (needUpdate)
         {
             needUpdate = false;
-            combineClues(clues, solution);  // Gen 4
             removeRedundantClues(clues);    // Gen 5
             removeRedundantClueElements(clues); // Gen 5
+            removeRedundantClues(clues);    // Gen 5
             removeRedundantSpaces(clues);   // Gen 6
+            removeRedundantClues(clues);    // Gen 5
+            combineClues(clues, solution);  // Gen 4
         }
+        //if (needLoop)
+        //    goto looper;
         for (int i = 0; i < clues.Count; i++)
             clues[i] = shrinkClue(clues[i]);
         turnSpacesBlack(clues);         // Gen 7
@@ -399,9 +436,56 @@ public class PuzzleGenerator {
                 }
             }
         }
-        return true;
+        return !(isContradicting(possible, clue, row, col));
     }
-
+    // Checks to see if placing the clue at the specific spot would cause a contradiction
+    private bool isContradicting(List<List<List<string>>> possible, string[][] clue, int row, int col)
+    {
+        List<List<List<string>>> copy = copyList(possible);
+        for (int i = 0; i < clue.Length; i++)
+        {
+            for (int j = 0; j < clue[i].Length; j++)
+            {
+                if (!(clue[i][j].Equals("WW") || clue[i][j].Equals("KK")))
+                {
+                    if (clue[i][j][0] == '-')
+                    {
+                        for (int k = 0; k < copy[i + row][j + col].Count; k++)
+                        {
+                            if (copy[i + row][j + col][k].Contains(clue[i][j].Substring(1)))
+                                copy[i + row][j + col].RemoveAt(k--);
+                        }
+                    }
+                    else
+                    {
+                        for (int k = 0; k < copy[i + row][j + col].Count; k++)
+                        {
+                            if (!(copy[i + row][j + col][k].Contains(clue[i][j])))
+                                copy[i + row][j + col].RemoveAt(k--);
+                        }
+                    }
+                }
+            }
+        }
+        Dictionary<string, int> dict = new Dictionary<string, int>();
+        for (int r = 0; r < copy.Count; r++)
+        {
+            for (int c = 0; c < copy[r].Count; c++)
+            {
+                string temp = string.Join("", copy[r][c].ToArray());
+                if (dict.ContainsKey(temp))
+                    dict[temp]++;
+                else
+                    dict.Add(temp, 1);
+            }
+        }
+        foreach (string str in dict.Keys)
+        {
+            if ((str.Length / 2) < dict[str])
+                return true;
+        }
+        return false;
+    }
     // Shrinks the clue, removing any KK spaces around it
     private string[][] shrinkClue(string[][] clue)
     {
@@ -828,6 +912,22 @@ public class PuzzleGenerator {
             copy[i] = new string[arr[i].Length];
             for (int j = 0; j < arr[i].Length; j++)
                 copy[i][j] = arr[i][j].ToUpperInvariant();
+        }
+        return copy;
+    }
+    // Copies the array
+    private List<List<List<string>>> copyList(List<List<List<string>>> list)
+    {
+        List<List<List<string>>> copy = new List<List<List<string>>>();
+        foreach(List<List<string>> row in list)
+        {
+            copy.Add(new List<List<string>>());
+            foreach(List<string> col in row)
+            {
+                copy[copy.Count - 1].Add(new List<string>());
+                foreach (string str in col)
+                    copy[copy.Count - 1][copy[copy.Count - 1].Count - 1].Add(str.ToUpperInvariant());
+            }
         }
         return copy;
     }
